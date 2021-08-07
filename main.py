@@ -5,16 +5,13 @@ import pandas as pd
 import openpyxl
 
 search_keyword = []
+search_option = []
 header = None
 result_set = []
 result_format = []
+result_dict = {}
 
-
-df = pd.DataFrame([[11, 21, 31], [12, 22, 32]], columns=['a', 'b'])
-print(df)
-
-
-while(True):
+while True:
     print("------------------------------")
     print("1. 페이지 조회[선택자, 태그 찾기]\n2. 페이지 동적 검색\n3. 종료")
     print("------------------------------")
@@ -35,7 +32,7 @@ while(True):
         soup = BeautifulSoup(webpage.text, "html.parser")
         print(soup.prettify())
 
-        while(True):
+        while True:
             print("------------------------------")
             print("1. 데이터 찾기\n2. 선택자, 태그 찾기\n3. 검색 종료")
             print("------------------------------")
@@ -53,10 +50,49 @@ while(True):
             if menu2 == 1:
                 keywords = input("키워드 입력(2개 이상 키워드 검색 시 구분자 '|' 입력 ex] 일|이|삼) : ")
                 datas = soup.find_all(text=re.compile(keywords))
+
                 print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
-                for data in datas:
-                    print(data.parent)
+                for i in range(0, len(datas)):
+                    datas[i] = datas[i].parent
+                    print(datas[i])
                 print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+
+                while True:
+                    print("--------- 탐 색 하 기----------")
+                    print("1. 부모 노드\n2. 이전 노드\n3. 다음 노드\n4. 생략")
+                    print("------------------------------")
+
+                    quest = None
+
+                    try:
+                        quest = int(input("메뉴 입력: "))
+                        if not (1 <= menu2 <= 5):
+                            print("1 ~ 5 메뉴만 선택해 주십시오.\n")
+                            continue
+                    except ValueError:
+                        print("숫자(정수)만 입력해 주십시오.\n")
+
+                    if quest == 1:
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                        for i in range(0, len(datas)):
+                            datas[i] = datas[i].parent
+                            print(datas[i])
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                    if quest == 2:
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                        for i in range(0, len(datas)):
+                            datas[i] = datas[i].previous
+                            print(datas[i])
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                    if quest == 3:
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                        for i in range(0, len(datas)):
+                            datas[i] = datas[i].next
+                            print(datas[i])
+                        print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
+                    if quest == 4:
+                        break
+
             elif menu2 == 2:
                 attr = input("속성 입력(2개 이상 속성 검색 시 구분자 '|' 입력 ex] id|class|name|title ... : ").split('|')
 
@@ -74,7 +110,36 @@ while(True):
                     print(data)
                 print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
 
-                print(dict(d))
+                option = []
+
+                while True:
+                    print('------- 옵션 -------')
+                    print('1. 부모 노드\n2. 이전 노드\n3. 다음 노드\n4. 옵션 추가\n5. 생략')
+                    print('-------------------')
+
+                    opt = None
+                    try:
+                        opt = int(input("옵션 입력: "))
+                        if not (1 <= menu <= 3):
+                            print("1 ~ 4 메뉴만 선택해 주십시오.\n")
+                            continue
+                    except ValueError:
+                        print("숫자(정수)만 입력해 주십시오.\n")
+
+                    if opt == 1:
+                        option.append('parent')
+                    elif opt == 2:
+                        option.append('prev')
+                    elif opt == 3:
+                        option.append('next')
+                    elif opt == 4:
+                        search_option.append(option)
+                        break
+                    elif opt == 5:
+                        break
+
+                print("키워드 : " + str(dict(d)))
+                print("옵션 : " + str(option))
                 ask = input("해당 검색 속성을 저장하시겠습니까? yes or no : ")
 
                 if ask == 'yes':
@@ -83,20 +148,21 @@ while(True):
                 break
 
     elif menu == 2:
-        url = input("URL 입력(바뀔 쿼리스트링 'query_string' 변경) ex] http://www.google.com/search?q=query_string&keyword=query_string1 : ")
-
+        # url = input("URL 입력(바뀔 쿼리스트링 'query_string' 변경) ex] http://www.google.com/search?q=query_string&keyword=query_string1 : ")
+        url = "http://www.druginfo.co.kr/p/atc-code-search/?offset=query_string&count=20&q=&sortDir=asc&sortBy=atcCode&fl=atcCode"
         query_range = input("범위 지정(구분자 '|'), 첫페이지|마지막페이지|증가수 ex) 0|6400|20 : ").split('|')
 
         header = input("헤더 설정(2개 이상 키워드 검색 시 구분자 '|' 입력) : ").split('/')
         for i in range(0, len(header)):
             result_format.append([])
 
-        while(True):
+        while True:
             print("--------------------------")
             print("현재 저장된 검색 속성")
             print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
             for i in range(0, len(search_keyword)):
                 print(search_keyword[i])
+                print(search_option[i])
             print("ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ")
             if len(header) == search_keyword:
                 break
@@ -130,8 +196,11 @@ while(True):
                 for z in range(0, len(result_set[i][j])):
                     result_format[j].append(result_set[i][j][z].getText())
 
-        df = pd.DataFrame([[111, 11], [22, 22]], columns=header)
-        df.to_excel('C:/Users/user/Desktop/sample.xlsx', index=False, header=False)
+        for i in range(0, len(header)):
+            result_dict[header[i]] = result_format[i]
+
+        df = pd.DataFrame(result_dict)
+        df.to_excel('C:/Users/PC/Desktop/sample.xlsx', index=False)
 
     elif menu == 3:
         break
