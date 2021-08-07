@@ -136,6 +136,7 @@ while True:
                         search_option.append(option)
                         break
                     elif opt == 5:
+                        search_option.append([])
                         break
 
                 print("키워드 : " + str(dict(d)))
@@ -150,9 +151,10 @@ while True:
     elif menu == 2:
         # url = input("URL 입력(바뀔 쿼리스트링 'query_string' 변경) ex] http://www.google.com/search?q=query_string&keyword=query_string1 : ")
         url = "http://www.druginfo.co.kr/p/atc-code-search/?offset=query_string&count=20&q=&sortDir=asc&sortBy=atcCode&fl=atcCode"
-        query_range = input("범위 지정(구분자 '|'), 첫페이지|마지막페이지|증가수 ex) 0|6400|20 : ").split('|')
+        # query_range = input("범위 지정(구분자 '|'), 첫페이지|마지막페이지|증가수 ex) 0|6400|20 : ").split('|')
+        query_range = "0|20|20".split("|")
 
-        header = input("헤더 설정(2개 이상 키워드 검색 시 구분자 '|' 입력) : ").split('/')
+        header = input("헤더 설정(2개 이상 키워드 검색 시 구분자 '|' 입력) : ").split('|')
         for i in range(0, len(header)):
             result_format.append([])
 
@@ -190,14 +192,25 @@ while True:
             for j in range(0, len(search_keyword)):
                 search.append(soup.find_all(attrs=dict(search_keyword[j])))
             result_set.append(search)
-
+        print(result_set)
         for i in range(0, len(result_set)):
             for j in range(0, len(result_set[i])):
                 for z in range(0, len(result_set[i][j])):
-                    result_format[j].append(result_set[i][j][z].getText())
+                    print(i, j, z)
+                    temp = result_set[i][j][z]
+                    for t in search_option[j]:
+                        if t == 'parent':
+                            temp = temp.parent
+                        if t == 'next':
+                            temp = temp.nextSibling
+                        if t == 'previous':
+                            temp = temp.previousSibling
+                    result_format[j].append(temp.text)
 
         for i in range(0, len(header)):
             result_dict[header[i]] = result_format[i]
+
+        print(result_dict)
 
         df = pd.DataFrame(result_dict)
         df.to_excel('C:/Users/PC/Desktop/sample.xlsx', index=False)
